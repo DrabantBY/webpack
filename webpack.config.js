@@ -11,83 +11,94 @@ module.exports = {
     
     devtool: devMode ? 'eval-cheap-module-source-map' : false,
 
-    entry: './src/index.js',
+    entry: {
+        main: './src/js/main.js',
+        donate: './src/js/donate.js',
+    },
 
     output: {
-        path: path.resolve(__dirname, 'dist'),
-        filename: '[name].[contenthash].js',
+        path: path.resolve(__dirname, 'public'),
+        filename: 'assets/js/[name].js',
         clean: true,
-        assetModuleFilename: 'assets/[name][ext]',
+        // assetModuleFilename: 'assets/[name][ext]',
     },
 
     devServer: {
         open: true,
         port: 3000,
         hot: true,
+        compress: true,
         client: { overlay: true, },
     },
 
     plugins: [
-        new HtmlWebpackPlugin({ template: './src/index.html', }),
-        new MiniCssExtractPlugin({ filename: '[name].[contenthash].css', }),
-    ],
+                new HtmlWebpackPlugin({
+                    title: 'PetStory',
+                    inject: true,
+                    template: './src/html/main.html', 
+                    filename: 'index.html',
+                    chunks: ['main'],
+                }),
+
+                new HtmlWebpackPlugin({
+                    title: 'Donate',
+                    inject: true,
+                    template: './src/html/donate.html', 
+                    filename: 'pages/donate.html',
+                    chunks: ['donate'],
+                }),
+
+                new MiniCssExtractPlugin({ filename: 'assets/css/[name].css', }),
+             ],
 
     module: {
-        rules: [
-            {
-                test: /\.m?js$/i,
-                exclude: /(node_modules|bower_components)/,
-                use: {
-                    loader: 'babel-loader',
-                    options: {
-                        presets: ['@babel/preset-env'],
-                    },
-                },
-            },
-
-            {
-                test: /\.html$/i,
-                loader: "html-loader",
-            },
-
-            {
-                test: /\.(sa|sc|c)ss$/i,
-                use: [
-                    devMode ? "style-loader" : MiniCssExtractPlugin.loader,
-                    "css-loader",
-                    "sass-loader",
-                    {
-                        loader: "postcss-loader",
-                        options: { 
-                            postcssOptions: {
-                                plugins: [ ['postcss-preset-env', {}] ],
+                rules: [
+                        {
+                            test: /\.m?js$/i,
+                            exclude: /(node_modules|bower_components)/,
+                            use: {
+                                loader: 'babel-loader',
+                                options: {
+                                    presets: ['@babel/preset-env'],
+                                },
                             },
                         },
 
-                    },
-                ],
-            },
+                        {
+                            test: /\.html$/i,
+                            loader: "html-loader",
+                        },
 
-            {
-                test: /\.woff2?$/i,
-                type: 'asset/resource',
-                generator: { filename: 'fonts/[name][ext]', }
-            },
+                        {
+                            test: /\.(sa|sc|c)ss$/i,
+                            use: [
+                                devMode ? "style-loader" : MiniCssExtractPlugin.loader,
+                                "css-loader",
+                                "sass-loader",
+                                {
+                                    loader: "postcss-loader",
+                                    options: { 
+                                        postcssOptions: {
+                                            plugins: [ ['postcss-preset-env', {}] ],
+                                        },
+                                    },
 
-            {
-                test: /\.(svg|png|jpe?g|webp|gif)$/i,
-                type: 'asset/resource',
-                use: {
-                    loader: 'image-webpack-loader',
-                    options: {
-                        mozjpeg: { progressive: true, },
-                        optipng: { enabled: false, },
-                        pngquant: { quality: [0.65, 0.90], speed: 4 },
-                        gifsicle: { interlaced: false, },
-                        webp: { quality: 75 },
-                    },
-                },    
+                                },
+                            ],
+                        },
+
+                        {
+                            test: /\.woff2?$/i,
+                            type: 'asset/resource',
+                            generator: { filename: 'assets/fonts/[name][ext]', },
+                        },
+
+                        {
+                            test: /\.(ico|svg|png|jpe?g|webp|gif)$/i,
+                            type: 'asset/resource',
+                            generator: { filename: 'assets/img/[ext]/[name][ext]', },
+                        },
+                    ],
             },
-        ],
-    },
+    optimization: { splitChunks: { chunks: 'all' }, },
 };
